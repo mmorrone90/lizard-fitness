@@ -1,0 +1,37 @@
+{
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "lizard-fitness-app",
+          "appId": "1:459804349520:android:aa9b939673ce742bf62d55",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "lizard-fitness-app",
+          "appId": "1:459804349520:ios:f6b0dee78ad611fff62d55",
+          "uploadDebugSymbols": false,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "lizard-fitness-app",
+          "configurations": {
+            "android": "1:459804349520:android:aa9b939673ce742bf62d55",
+            "ios": "1:459804349520:ios:f6b0dee78ad611fff62d55"
+          }
+        }
+      }
+    }
+  }
+}
