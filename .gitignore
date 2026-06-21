@@ -1,4 +1,5 @@
 
-# Firebase platform config (contain API keys — inject via CI or local only)
+# Firebase config files (contain API keys — generate locally or inject via CI)
 android/app/google-services.json
 ios/Runner/GoogleService-Info.plist
+lib/firebase_options.dart
