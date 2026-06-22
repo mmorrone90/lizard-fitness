@@ -115,7 +115,12 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
       return const Scaffold(body: Center(child: CircularProgressIndicator(color: kYellow)));
     }
 
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _showCancelDialog();
+      },
+      child: Scaffold(
       backgroundColor: kBlack,
       appBar: AppBar(
         title: Text(workout.title),
@@ -157,7 +162,7 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
           _buildFinishButton(),
         ],
       ),
-    );
+    )); // PopScope + Scaffold
   }
 
   Widget _buildRestBanner() {
@@ -195,25 +200,29 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
   }
 
   void _showCancelDialog() {
-    showDialog(
+    showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dialogCtx) => AlertDialog(
         backgroundColor: kCard,
         title: const Text('Cancel workout?'),
         content: const Text('Your progress will be lost.'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Keep going')),
           TextButton(
-            onPressed: () {
-              ref.read(activeWorkoutProvider.notifier).cancel();
-              Navigator.pop(context);
-              context.go('/workout');
-            },
+            onPressed: () => Navigator.of(dialogCtx).pop(false),
+            child: const Text('Keep going'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogCtx).pop(true),
             child: const Text('Cancel workout', style: TextStyle(color: kError)),
           ),
         ],
       ),
-    );
+    ).then((confirmed) {
+      if (confirmed == true && mounted) {
+        ref.read(activeWorkoutProvider.notifier).cancel();
+        // build() detects workout == null and navigates away
+      }
+    });
   }
 }
 
