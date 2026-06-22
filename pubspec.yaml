@@ -26,6 +26,7 @@ dependencies:
 
   # UI / Charts
   fl_chart: ^0.70.2
+  flutter_svg: ^2.0.9
   cached_network_image: ^3.4.1
   image_picker: ^1.1.2
   shimmer: ^3.0.0
