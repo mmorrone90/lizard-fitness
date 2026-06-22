@@ -398,7 +398,13 @@ class _DrumRollPickerState extends State<_DrumRollPicker> {
             physics: const FixedExtentScrollPhysics(),
             perspective: 0.003,
             diameterRatio: 2.5,
-            onSelectedItemChanged: widget.onChanged,
+            // Ignore the build-phase settle (i == current selection); it would
+            // call setState on the parent during build. Only real user scrolls
+            // to a different index propagate.
+            onSelectedItemChanged: (i) {
+              if (i == widget.selectedIndex) return;
+              widget.onChanged(i);
+            },
             childDelegate: ListWheelChildBuilderDelegate(
               childCount: widget.items.length,
               builder: (context, i) {
