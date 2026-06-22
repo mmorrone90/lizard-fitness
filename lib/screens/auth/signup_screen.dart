@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:lizard_fitness/providers/auth_provider.dart';
 import 'package:lizard_fitness/theme/app_theme.dart';
 import 'package:lizard_fitness/widgets/common/lf_text_field.dart';
+import 'package:lizard_fitness/widgets/common/social_auth_buttons.dart';
 
 class SignupScreen extends ConsumerStatefulWidget {
   const SignupScreen({super.key});
@@ -112,13 +113,33 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                     return null;
                   },
                 ),
+                const SizedBox(height: 16),
+                SocialAuthButtons(
+                  onGoogle: () => ref.read(authNotifierProvider.notifier).signInWithGoogle(),
+                  onApple: () => ref.read(authNotifierProvider.notifier).signInWithApple(),
+                  isLoading: auth.isLoading,
+                ),
                 const SizedBox(height: 28),
                 if (auth.hasError)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: Text(
-                      _friendlyError(auth.error.toString()),
-                      style: const TextStyle(color: kError),
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 16),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: kError.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: kError.withOpacity(0.3)),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.error_outline, color: kError, size: 18),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            _friendlyError(auth.error.toString()),
+                            style: const TextStyle(color: kError, fontSize: 13),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ElevatedButton(
@@ -131,7 +152,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('Already have an account? ', style: Theme.of(context).textTheme.bodyMedium),
+                    Text('Already have an account? ', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: kTextMuted)),
                     TextButton(
                       onPressed: () => context.go('/login'),
                       child: const Text('Log in'),

@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 enum MuscleGroup {
@@ -22,6 +23,7 @@ extension MuscleGroupExt on MuscleGroup {
     MuscleGroup.cardio => 'Cardio',
   };
 
+  // kept for backward compat but prefer icon/color
   String get emoji => switch (this) {
     MuscleGroup.chest => '🫁',
     MuscleGroup.back => '🔙',
@@ -36,6 +38,38 @@ extension MuscleGroupExt on MuscleGroup {
     MuscleGroup.core => '⚡',
     MuscleGroup.fullBody => '🏋️',
     MuscleGroup.cardio => '❤️',
+  };
+
+  IconData get icon => switch (this) {
+    MuscleGroup.chest       => Icons.fitness_center,
+    MuscleGroup.back        => Icons.accessibility_new,
+    MuscleGroup.shoulders   => Icons.sports_handball,
+    MuscleGroup.biceps      => Icons.fitness_center,
+    MuscleGroup.triceps     => Icons.fitness_center,
+    MuscleGroup.forearms    => Icons.pan_tool_outlined,
+    MuscleGroup.quads       => Icons.directions_run,
+    MuscleGroup.hamstrings  => Icons.directions_walk,
+    MuscleGroup.glutes      => Icons.directions_walk,
+    MuscleGroup.calves      => Icons.directions_walk,
+    MuscleGroup.core        => Icons.rotate_90_degrees_ccw,
+    MuscleGroup.fullBody    => Icons.self_improvement,
+    MuscleGroup.cardio      => Icons.favorite,
+  };
+
+  Color get color => switch (this) {
+    MuscleGroup.chest       => const Color(0xFFEF5350),
+    MuscleGroup.back        => const Color(0xFF42A5F5),
+    MuscleGroup.shoulders   => const Color(0xFF26C6DA),
+    MuscleGroup.biceps      => const Color(0xFF66BB6A),
+    MuscleGroup.triceps     => const Color(0xFF9CCC65),
+    MuscleGroup.forearms    => const Color(0xFFD4E157),
+    MuscleGroup.quads       => const Color(0xFFAB47BC),
+    MuscleGroup.hamstrings  => const Color(0xFF7E57C2),
+    MuscleGroup.glutes      => const Color(0xFFEC407A),
+    MuscleGroup.calves      => const Color(0xFF26A69A),
+    MuscleGroup.core        => const Color(0xFFFFD600),
+    MuscleGroup.fullBody    => const Color(0xFFFFFFFF),
+    MuscleGroup.cardio      => const Color(0xFFFF7043),
   };
 }
 

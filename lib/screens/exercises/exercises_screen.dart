@@ -55,18 +55,20 @@ class ExercisesScreen extends ConsumerWidget {
                     child: ListView(
                       scrollDirection: Axis.horizontal,
                       children: [
-                        FilterChip(
-                          label: const Text('All'),
+                        _MuscleChip(
+                          label: 'All',
                           selected: muscleFilter == null,
-                          onSelected: (_) => ref.read(exerciseMuscleFilterProvider.notifier).state = null,
+                          color: kYellow,
+                          onTap: () => ref.read(exerciseMuscleFilterProvider.notifier).state = null,
                         ),
                         const SizedBox(width: 6),
                         ...MuscleGroup.values.map((m) => Padding(
                           padding: const EdgeInsets.only(right: 6),
-                          child: FilterChip(
-                            label: Text(m.label),
+                          child: _MuscleChip(
+                            label: m.label,
+                            color: m.color,
                             selected: muscleFilter == m,
-                            onSelected: (_) => ref.read(exerciseMuscleFilterProvider.notifier).state = muscleFilter == m ? null : m,
+                            onTap: () => ref.read(exerciseMuscleFilterProvider.notifier).state = muscleFilter == m ? null : m,
                           ),
                         )),
                       ],
@@ -101,41 +103,120 @@ class _ExerciseRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final muscle = exercise.primaryMuscle;
+    final diff = exercise.difficulty;
+    final diffColor = switch (diff) {
+      DifficultyLevel.beginner     => const Color(0xFF66BB6A),
+      DifficultyLevel.intermediate => const Color(0xFFFFA726),
+      DifficultyLevel.advanced     => const Color(0xFFEF5350),
+    };
+
     return GestureDetector(
       onTap: () => context.push('/exercises/${exercise.id}'),
       child: Container(
-        margin: const EdgeInsets.only(bottom: 8),
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(color: kCard, borderRadius: BorderRadius.circular(12)),
+        margin: const EdgeInsets.only(bottom: 10),
+        decoration: BoxDecoration(
+          color: kCard,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: kCardLight.withOpacity(0.5), width: 1),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          child: Row(
+            children: [
+              // Muscle icon
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: muscle.color.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: muscle.color.withOpacity(0.25), width: 1.5),
+                ),
+                child: Icon(muscle.icon, color: muscle.color, size: 22),
+              ),
+              const SizedBox(width: 14),
+              // Info
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(exercise.name, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: muscle.color.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            muscle.label,
+                            style: TextStyle(color: muscle.color, fontSize: 11, fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: diffColor.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            diff.label,
+                            style: TextStyle(color: diffColor, fontSize: 11, fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right, color: kTextMuted, size: 18),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MuscleChip extends StatelessWidget {
+  final String label;
+  final Color color;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _MuscleChip({required this.label, required this.color, required this.selected, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: selected ? color.withOpacity(0.18) : kCard,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: selected ? color : kCardLight, width: 1.5),
+        ),
         child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: kYellow.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Center(child: Text(exercise.primaryMuscle.emoji, style: const TextStyle(fontSize: 22))),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(exercise.name, style: Theme.of(context).textTheme.titleMedium),
-                  const SizedBox(height: 2),
-                  Row(
-                    children: [
-                      Text(exercise.primaryMuscle.label, style: Theme.of(context).textTheme.bodySmall),
-                      Text(' · ', style: Theme.of(context).textTheme.bodySmall),
-                      Text(exercise.difficulty.label, style: Theme.of(context).textTheme.bodySmall),
-                    ],
-                  ),
-                ],
+            if (selected) ...[
+              Container(width: 6, height: 6, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+              const SizedBox(width: 5),
+            ],
+            Text(
+              label,
+              style: TextStyle(
+                color: selected ? color : kTextMuted,
+                fontSize: 12,
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
               ),
             ),
-            const Icon(Icons.chevron_right, color: kTextMuted, size: 20),
           ],
         ),
       ),
