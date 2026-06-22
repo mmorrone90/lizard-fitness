@@ -398,12 +398,15 @@ class _DrumRollPickerState extends State<_DrumRollPicker> {
             physics: const FixedExtentScrollPhysics(),
             perspective: 0.003,
             diameterRatio: 2.5,
-            // Ignore the build-phase settle (i == current selection); it would
-            // call setState on the parent during build. Only real user scrolls
-            // to a different index propagate.
+            // onSelectedItemChanged can fire synchronously during build (initial
+            // settle and the jumpToItem in didUpdateWidget). Calling the parent
+            // onChanged there triggers setState-during-build. Defer to post-frame
+            // and skip no-op reports.
             onSelectedItemChanged: (i) {
               if (i == widget.selectedIndex) return;
-              widget.onChanged(i);
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) widget.onChanged(i);
+              });
             },
             childDelegate: ListWheelChildBuilderDelegate(
               childCount: widget.items.length,
