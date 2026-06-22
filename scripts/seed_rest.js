@@ -11,8 +11,28 @@ const https = require('https');
 const PROJECT = process.env.FIREBASE_PROJECT_ID || 'lizard-fitness-app';
 const cfg = JSON.parse(fs.readFileSync(
   path.join(os.homedir(), '.config/configstore/firebase-tools.json'), 'utf8'));
-const TOKEN = cfg.tokens && cfg.tokens.access_token;
-if (!TOKEN) { console.error('No Firebase CLI access token'); process.exit(1); }
+
+// Mint a fresh cloud-platform token from the CLI's refresh token; the stored
+// access_token expires and Firestore rejects it (ACCESS_TOKEN_TYPE_UNSUPPORTED).
+function freshToken() {
+  return new Promise((resolve, reject) => {
+    const body = new URLSearchParams({
+      client_id: '563584335869-fgrhgmd47bqnekij5i8b5pr03ho849e6.apps.googleusercontent.com',
+      client_secret: 'j9iVZfS8kkCEFUPaAeJV0sAi',
+      grant_type: 'refresh_token',
+      refresh_token: cfg.tokens.refresh_token,
+    }).toString();
+    const r = https.request({
+      hostname: 'oauth2.googleapis.com', path: '/token', method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Content-Length': Buffer.byteLength(body) },
+    }, (res) => {
+      let out = ''; res.on('data', (d) => out += d);
+      res.on('end', () => { const j = JSON.parse(out); j.access_token ? resolve(j.access_token) : reject(new Error(out)); });
+    });
+    r.on('error', reject); r.write(body); r.end();
+  });
+}
+let TOKEN = '';
 
 const TS = { __serverTimestamp: true };
 function randId(n = 20) {
@@ -99,4 +119,7 @@ Module._load = function (request, parent, isMain) {
   return origLoad.apply(this, arguments);
 };
 
-require(path.join(__dirname, '..', 'seed_data.js'));
+freshToken().then((t) => {
+  TOKEN = t;
+  require(path.join(__dirname, '..', 'seed_data.js'));
+}).catch((e) => { console.error('Token refresh failed:', e.message); process.exit(1); });

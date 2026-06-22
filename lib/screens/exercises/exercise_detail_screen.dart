@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lizard_fitness/models/exercise.dart';
 import 'package:lizard_fitness/providers/auth_provider.dart';
 import 'package:lizard_fitness/theme/app_theme.dart';
+import 'package:lizard_fitness/widgets/exercises/exercise_video.dart';
 
 final _exerciseDetailProvider = FutureProvider.family<Exercise?, String>((ref, id) async {
   return ref.watch(firestoreServiceProvider).getExercise(id);
@@ -65,25 +66,12 @@ class _ExerciseDetail extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _TagRow(exercise: exercise),
-                const SizedBox(height: 24),
-                _Section(
-                  title: 'How to do it',
-                  items: exercise.instructions,
-                  numbered: true,
-                ),
-                if (exercise.formTips.isNotEmpty) ...[
-                  const SizedBox(height: 20),
-                  _Section(title: 'Form Tips', items: exercise.formTips, icon: Icons.tips_and_updates_outlined, iconColor: kYellow),
-                ],
-                if (exercise.safetyTips.isNotEmpty) ...[
-                  const SizedBox(height: 20),
-                  _Section(title: 'Safety Tips', items: exercise.safetyTips, icon: Icons.shield_outlined, iconColor: kSuccess),
-                ],
-                if (exercise.commonMistakes.isNotEmpty) ...[
-                  const SizedBox(height: 20),
-                  _Section(title: 'Common Mistakes', items: exercise.commonMistakes, icon: Icons.warning_amber_outlined, iconColor: kError),
-                ],
+                const SizedBox(height: 20),
+                Text('How to perform', style: Theme.of(context).textTheme.headlineSmall),
+                const SizedBox(height: 12),
+                ExerciseVideo(url: exercise.videoUrl),
                 if (exercise.secondaryMuscles.isNotEmpty) ...[
+                  const SizedBox(height: 24),
                   const SizedBox(height: 20),
                   Text('Secondary Muscles', style: Theme.of(context).textTheme.headlineSmall),
                   const SizedBox(height: 10),
@@ -139,52 +127,3 @@ class _Tag extends StatelessWidget {
   }
 }
 
-class _Section extends StatelessWidget {
-  final String title;
-  final List<String> items;
-  final bool numbered;
-  final IconData? icon;
-  final Color? iconColor;
-
-  const _Section({
-    required this.title,
-    required this.items,
-    this.numbered = false,
-    this.icon,
-    this.iconColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            if (icon != null) ...[
-              Icon(icon, color: iconColor, size: 18),
-              const SizedBox(width: 8),
-            ],
-            Text(title, style: Theme.of(context).textTheme.headlineSmall),
-          ],
-        ),
-        const SizedBox(height: 10),
-        ...items.asMap().entries.map((e) => Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                width: 24,
-                child: numbered
-                    ? Text('${e.key + 1}.', style: const TextStyle(color: kYellow, fontWeight: FontWeight.w700))
-                    : const Icon(Icons.circle, size: 6, color: kYellow),
-              ),
-              Expanded(child: Text(e.value, style: Theme.of(context).textTheme.bodyLarge)),
-            ],
-          ),
-        )),
-      ],
-    );
-  }
-}
