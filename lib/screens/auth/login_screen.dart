@@ -40,11 +40,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     ref.listen(authStateProvider, (_, next) {
       final user = next.valueOrNull;
-      if (user != null) {
-        ref.read(authServiceProvider).isOnboardingCompleted(user.uid).then((done) {
-          if (context.mounted) context.go(done ? '/home' : '/onboarding');
-        });
-      }
+      if (user == null) return;
+      // Capture router + service synchronously; the screen disposes on
+      // navigation, so we must not touch State.context after the async gap.
+      final router = GoRouter.of(context);
+      ref.read(authServiceProvider).isOnboardingCompleted(user.uid).then((done) {
+        router.go(done ? '/home' : '/onboarding');
+      });
     });
 
     return Scaffold(
