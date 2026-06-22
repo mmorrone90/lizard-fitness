@@ -81,9 +81,10 @@ class ExercisesScreen extends ConsumerWidget {
               child: filtered.when(
                 data: (list) => list.isEmpty
                     ? _EmptyState()
-                    : ListView.builder(
+                    : ListView.separated(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         itemCount: list.length,
+                        separatorBuilder: (_, __) => Divider(height: 1, color: kCardLight.withOpacity(0.4), indent: 62),
                         itemBuilder: (_, i) => _ExerciseRow(exercise: list[i]),
                       ),
                 loading: () => const Center(child: CircularProgressIndicator(color: kYellow)),
@@ -104,78 +105,48 @@ class _ExerciseRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final muscle = exercise.primaryMuscle;
-    final diff = exercise.difficulty;
-    final diffColor = switch (diff) {
-      DifficultyLevel.beginner     => const Color(0xFF66BB6A),
-      DifficultyLevel.intermediate => const Color(0xFFFFA726),
-      DifficultyLevel.advanced     => const Color(0xFFEF5350),
-    };
 
-    return GestureDetector(
+    return InkWell(
       onTap: () => context.push('/exercises/${exercise.id}'),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 10),
-        decoration: BoxDecoration(
-          color: kCard,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: kCardLight.withOpacity(0.5), width: 1),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          child: Row(
-            children: [
-              // Muscle icon
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: muscle.color.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: muscle.color.withOpacity(0.25), width: 1.5),
-                ),
-                child: Icon(muscle.icon, color: muscle.color, size: 22),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Row(
+          children: [
+            // Muscle icon
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: muscle.color.withOpacity(0.12),
+                shape: BoxShape.circle,
+                border: Border.all(color: muscle.color.withOpacity(0.25), width: 1.5),
               ),
-              const SizedBox(width: 14),
-              // Info
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(exercise.name, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: muscle.color.withOpacity(0.12),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            muscle.label,
-                            style: TextStyle(color: muscle.color, fontSize: 11, fontWeight: FontWeight.w600),
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: diffColor.withOpacity(0.12),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            diff.label,
-                            style: TextStyle(color: diffColor, fontSize: 11, fontWeight: FontWeight.w600),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+              child: Icon(muscle.icon, color: muscle.color, size: 22),
+            ),
+            const SizedBox(width: 14),
+            // Name + muscle subtitle
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(exercise.name,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 2),
+                  Text(muscle.label, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: kTextMuted)),
+                ],
               ),
-              const Icon(Icons.chevron_right, color: kTextMuted, size: 18),
-            ],
-          ),
+            ),
+            // Trailing trend circle
+            Container(
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: kCardLight, width: 1.5),
+              ),
+              child: const Icon(Icons.trending_up, color: kTextSecondary, size: 18),
+            ),
+          ],
         ),
       ),
     );

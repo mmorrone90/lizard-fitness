@@ -11,6 +11,7 @@ import 'package:lizard_fitness/widgets/home/recent_workouts_list.dart';
 import 'package:lizard_fitness/widgets/home/volume_chart.dart';
 import 'package:lizard_fitness/widgets/home/personal_records_section.dart';
 import 'package:lizard_fitness/widgets/home/today_workout_card.dart';
+import 'package:lizard_fitness/widgets/home/week_strip.dart';
 import 'package:intl/intl.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -39,6 +40,8 @@ class HomeScreen extends ConsumerWidget {
                   final summary = computeWeeklySummary(list);
                   return Column(
                     children: [
+                      WeekStrip(sessions: list),
+                      const SizedBox(height: 16),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: TodayWorkoutCard(
