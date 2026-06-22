@@ -338,15 +338,28 @@ class _ExercisePickerSheet extends ConsumerWidget {
                 controller: controller,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 itemCount: list.length,
-                itemBuilder: (_, i) => ListTile(
-                  leading: Text(list[i].primaryMuscle.emoji, style: const TextStyle(fontSize: 24)),
-                  title: Text(list[i].name, style: Theme.of(context).textTheme.titleMedium),
-                  subtitle: Text(list[i].primaryMuscle.label, style: Theme.of(context).textTheme.bodySmall),
-                  onTap: () {
-                    onAdd(list[i]);
-                    Navigator.pop(context);
-                  },
-                ),
+                itemBuilder: (_, i) {
+                  final muscle = list[i].primaryMuscle;
+                  return Material(
+                    color: Colors.transparent,
+                    child: ListTile(
+                      leading: Container(
+                        width: 40, height: 40,
+                        decoration: BoxDecoration(
+                          color: muscle.color.withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(muscle.icon, color: muscle.color, size: 20),
+                      ),
+                      title: Text(list[i].name, style: Theme.of(context).textTheme.titleMedium),
+                      subtitle: Text(muscle.label, style: Theme.of(context).textTheme.bodySmall),
+                      onTap: () {
+                        onAdd(list[i]);
+                        Navigator.pop(context);
+                      },
+                    ),
+                  );
+                },
               ),
               loading: () => const Center(child: CircularProgressIndicator(color: kYellow)),
               error: (_, __) => const Center(child: Text('Error loading exercises')),

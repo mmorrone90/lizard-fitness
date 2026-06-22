@@ -338,11 +338,14 @@ class _SettingsTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: Icon(icon, color: color, size: 22),
-      title: Text(title, style: TextStyle(color: color, fontWeight: FontWeight.w500)),
-      trailing: Icon(Icons.chevron_right, color: color == kTextPrimary ? kTextMuted : color, size: 18),
-      onTap: onTap,
+    return Material(
+      color: Colors.transparent,
+      child: ListTile(
+        leading: Icon(icon, color: color, size: 22),
+        title: Text(title, style: TextStyle(color: color, fontWeight: FontWeight.w500)),
+        trailing: Icon(Icons.chevron_right, color: color == kTextPrimary ? kTextMuted : color, size: 18),
+        onTap: onTap,
+      ),
     );
   }
 }
