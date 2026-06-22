@@ -5,7 +5,6 @@ import 'package:lizard_fitness/providers/auth_provider.dart';
 import 'package:lizard_fitness/providers/workout_provider.dart';
 import 'package:lizard_fitness/theme/app_theme.dart';
 import 'package:lizard_fitness/models/workout.dart';
-import 'package:lizard_fitness/models/exercise.dart';
 
 class WorkoutScreen extends ConsumerWidget {
   const WorkoutScreen({super.key});
@@ -14,7 +13,6 @@ class WorkoutScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final auth = ref.watch(authStateProvider);
     final uid = auth.valueOrNull?.uid;
-    final templates = ref.watch(workoutTemplatesProvider);
     final customWorkouts = uid != null ? ref.watch(customWorkoutsProvider(uid)) : null;
     final activeWorkout = ref.watch(activeWorkoutProvider);
 
@@ -32,25 +30,6 @@ class WorkoutScreen extends ConsumerWidget {
             if (activeWorkout != null)
               SliverToBoxAdapter(child: _ActiveBanner(onResume: () => context.push('/workout/active'))),
             SliverToBoxAdapter(child: _QuickStartSection(uid: uid)),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
-                child: Text('Workout Templates', style: Theme.of(context).textTheme.headlineSmall),
-              ),
-            ),
-            templates.when(
-              data: (list) => SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (_, i) => Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-                    child: _TemplateCard(template: list[i]),
-                  ),
-                  childCount: list.length,
-                ),
-              ),
-              loading: () => const SliverToBoxAdapter(child: Center(child: CircularProgressIndicator(color: kYellow))),
-              error: (_, __) => const SliverToBoxAdapter(child: SizedBox()),
-            ),
             if (uid != null) ...[
               SliverToBoxAdapter(
                 child: Padding(
@@ -149,70 +128,6 @@ class _QuickStartSection extends ConsumerWidget {
   }
 }
 
-class _TemplateCard extends ConsumerWidget {
-  final WorkoutTemplate template;
-  const _TemplateCard({required this.template});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: kCard,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: kCardLight),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(child: Text(template.title, style: Theme.of(context).textTheme.headlineSmall)),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: kYellow.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  template.difficulty.label,
-                  style: const TextStyle(color: kYellow, fontSize: 11, fontWeight: FontWeight.w700),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Text(template.description, style: Theme.of(context).textTheme.bodyMedium, maxLines: 2),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              const Icon(Icons.timer_outlined, size: 14, color: kTextMuted),
-              const SizedBox(width: 4),
-              Text('${template.estimatedDuration}min', style: Theme.of(context).textTheme.bodySmall),
-              const SizedBox(width: 16),
-              const Icon(Icons.fitness_center, size: 14, color: kTextMuted),
-              const SizedBox(width: 4),
-              Text('${template.exercises.length} exercises', style: Theme.of(context).textTheme.bodySmall),
-            ],
-          ),
-          const SizedBox(height: 14),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {
-                ref.read(activeWorkoutProvider.notifier).startFromTemplate(template);
-                context.push('/workout/active');
-              },
-              style: ElevatedButton.styleFrom(minimumSize: const Size.fromHeight(44)),
-              child: const Text('START'),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _CustomWorkoutCard extends ConsumerWidget {
   final CustomWorkout workout;
   const _CustomWorkoutCard({required this.workout});
@@ -237,6 +152,35 @@ class _CustomWorkoutCard extends ConsumerWidget {
                 Text('${workout.exercises.length} exercises', style: Theme.of(context).textTheme.bodyMedium),
               ],
             ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.edit_outlined, color: kTextMuted, size: 20),
+            onPressed: () => context.push('/exercises/builder/new', extra: workout),
+            tooltip: 'Edit',
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete_outline, color: kError, size: 20),
+            tooltip: 'Delete',
+            onPressed: () async {
+              final ok = await showDialog<bool>(
+                context: context,
+                builder: (dCtx) => AlertDialog(
+                  backgroundColor: kCard,
+                  title: const Text('Delete workout?'),
+                  content: Text('"${workout.title}" will be removed.'),
+                  actions: [
+                    TextButton(onPressed: () => Navigator.of(dCtx).pop(false), child: const Text('Cancel')),
+                    TextButton(
+                      onPressed: () => Navigator.of(dCtx).pop(true),
+                      child: const Text('Delete', style: TextStyle(color: kError)),
+                    ),
+                  ],
+                ),
+              );
+              if (ok == true) {
+                await ref.read(firestoreServiceProvider).deleteCustomWorkout(workout.id);
+              }
+            },
           ),
           TextButton(
             onPressed: () {
