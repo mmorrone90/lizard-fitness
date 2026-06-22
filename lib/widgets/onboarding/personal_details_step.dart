@@ -58,31 +58,30 @@ class PersonalDetailsStep extends StatelessWidget {
           // Gender
           _SectionHeader(title: 'Gender'),
           const SizedBox(height: 12),
-          Row(
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
             children: Gender.values.map((g) {
               final selected = gender == g;
-              return Padding(
-                padding: const EdgeInsets.only(right: 10),
-                child: GestureDetector(
-                  onTap: () => onChanged(gender: g),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 180),
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: selected ? kYellow : kCard,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: selected ? kYellow : kCardLight,
-                        width: 1.5,
-                      ),
+              return GestureDetector(
+                onTap: () => onChanged(gender: g),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: selected ? kYellow : kCard,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: selected ? kYellow : kCardLight,
+                      width: 1.5,
                     ),
-                    child: Text(
-                      g.label,
-                      style: TextStyle(
-                        color: selected ? kBlack : kTextMuted,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                      ),
+                  ),
+                  child: Text(
+                    g.label,
+                    style: TextStyle(
+                      color: selected ? kBlack : kTextMuted,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
                     ),
                   ),
                 ),

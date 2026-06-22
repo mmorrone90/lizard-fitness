@@ -295,22 +295,22 @@ class _SettingsSection extends ConsumerWidget {
                   onTap: () async {
                     final confirmed = await showDialog<bool>(
                       context: context,
-                      builder: (_) => AlertDialog(
+                      builder: (dialogCtx) => AlertDialog(
                         backgroundColor: kCard,
                         title: const Text('Log out?'),
                         content: const Text('You will need to log in again.'),
                         actions: [
-                          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+                          TextButton(onPressed: () => Navigator.of(dialogCtx).pop(false), child: const Text('Cancel')),
                           TextButton(
-                            onPressed: () => Navigator.pop(context, true),
+                            onPressed: () => Navigator.of(dialogCtx).pop(true),
                             child: const Text('Log out', style: TextStyle(color: kError)),
                           ),
                         ],
                       ),
                     );
                     if (confirmed == true) {
+                      // Router redirect sends us to /login when authState clears.
                       await ref.read(authNotifierProvider.notifier).signOut();
-                      if (context.mounted) context.go('/login');
                     }
                   },
                 ),
