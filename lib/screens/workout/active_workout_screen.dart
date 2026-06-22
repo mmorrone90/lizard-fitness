@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lizard_fitness/models/workout_session.dart';
@@ -37,14 +38,26 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
   void _startRest(int seconds) {
     _restTimer?.cancel();
     setState(() => _restCountdown = seconds);
+    // Rest started: short buzz + click
+    HapticFeedback.mediumImpact();
+    SystemSound.play(SystemSoundType.click);
     _restTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (_restCountdown == null || _restCountdown! <= 0) {
+      if (_restCountdown == null || _restCountdown! <= 1) {
         _restTimer?.cancel();
         setState(() => _restCountdown = null);
+        _restFinished();
       } else {
         setState(() => _restCountdown = _restCountdown! - 1);
       }
     });
+  }
+
+  void _restFinished() {
+    // Rest over: strong buzz + alert sound
+    HapticFeedback.heavyImpact();
+    SystemSound.play(SystemSoundType.alert);
+    // ponytail: double-buzz for emphasis; swap to vibration pkg if custom pattern needed
+    Future.delayed(const Duration(milliseconds: 250), HapticFeedback.heavyImpact);
   }
 
   String _formatDuration(int seconds) {
@@ -166,22 +179,40 @@ class _ActiveWorkoutScreenState extends ConsumerState<ActiveWorkoutScreen> {
   }
 
   Widget _buildRestBanner() {
+    final remaining = _restCountdown!;
+    final almostDone = remaining <= 3;
+    final color = almostDone ? kError : kYellow;
     return Container(
-      color: kYellow.withOpacity(0.1),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      width: double.infinity,
+      color: color.withOpacity(0.12),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Row(
         children: [
-          const Icon(Icons.timer, color: kYellow, size: 18),
-          const SizedBox(width: 8),
-          Text('Rest: ${_formatDuration(_restCountdown!)}',
-            style: const TextStyle(color: kYellow, fontWeight: FontWeight.w700)),
+          Icon(Icons.timer, color: color, size: 28),
+          const SizedBox(width: 14),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('REST',
+                style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 1.5)),
+              Text(_formatDuration(remaining),
+                style: TextStyle(
+                  color: color,
+                  fontSize: 36,
+                  fontWeight: FontWeight.w800,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                  height: 1.0,
+                )),
+            ],
+          ),
           const Spacer(),
           TextButton(
             onPressed: () {
               _restTimer?.cancel();
               setState(() => _restCountdown = null);
             },
-            child: const Text('Skip'),
+            style: TextButton.styleFrom(foregroundColor: color),
+            child: const Text('SKIP', style: TextStyle(fontWeight: FontWeight.w700)),
           ),
         ],
       ),
